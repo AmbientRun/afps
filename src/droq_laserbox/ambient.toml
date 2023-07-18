@@ -1,0 +1,40 @@
+[ember]
+id = "droq_laserbox"
+name = "droq_laserbox"
+version = "0.0.1"
+
+# internal message
+[messages.spawn_laserbox.fields]
+position = { type = "Vec3" }
+facing_rot = { type = "Quat" }
+facing_dir = { type = "Vec3" }
+
+[components]
+laserbox = { type = "Empty" }
+laserbox_laser_rot = { type = "Quat" }
+laserbox_dir = { type = "Vec3" }
+laserbox_range = { type = "F32" }
+laserbox_laser_ent = { type = "EntityId" }
+laserbox_enabled = { type = "Bool" }
+laserbeam_origin = { type = "Vec3" }
+laserbeam_dir = { type = "Vec3" }
+laserbeam_range = { type = "F32" }
+
+[concepts.laser_box]
+name = "Laser Box"
+description = "A laser box"
+
+[concepts.laser_box.components]
+laserbox_laser_rot = [0.0, 0.0, 0.0, 1.0]
+laserbox_dir = [0.0, 1.0, 0.0]
+laserbox_range = 20.0
+laserbox_enabled = false
+
+[concepts.laser_beam]
+name = "Laser Beam"
+description = "A laser beam from a laser box"
+
+[concepts.laser_beam.components]
+laserbeam_origin = [0.0, 0.0, 0.0]
+laserbeam_dir = [0.0, 1.0, 0.0]
+laserbeam_range = 20.0

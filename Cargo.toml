@@ -8,6 +8,8 @@ version = "0.0.1"
 [dependencies]
 # ambient_api = { path = "../Ambient/guest/rust/api" }
 ambient_api = { git = "https://github.com/AmbientRun/Ambient.git", rev = "10c57e36c7da588195ec526acb9ef96ee27e0dcb" }
+regex = "1"
+glam = "0.24.1"
 
 # Group 1: show the UI
 # This include the aiming cross in the middle of the screen
@@ -88,15 +90,44 @@ required-features = ["server"]
 # The Zombie rules and health/hit anim is not included yet
 # They simply spawan and chase the nearest player
 
-# [[bin]]
-# name = "zombie_server"
-# path = "src/zombie/server.rs"
-# required-features = ["server"]
+[[bin]]
+name = "zombie_server"
+path = "src/zombie/server.rs"
+required-features = ["server"]
 
-# [[bin]]
-# name = "zombie_client"
-# path = "src/zombie/client.rs"
-# required-features = ["client"]
+[[bin]]
+name = "zombie_client"
+path = "src/zombie/client.rs"
+required-features = ["client"]
+
+# Group 8: Laserbox.
+# A laser that can be toggled by shooting the box
+# that is its source
+
+[[bin]]
+name = "droq_laserbox_server"
+path = "src/droq_laserbox/server.rs"
+required-features = ["server"]
+
+[[bin]]
+name = "droq_laserbox_client"
+path = "src/droq_laserbox/client.rs"
+required-features = ["client"]
+
+[[bin]]
+name = "droq_laserbox_placement1_server"
+path = "src/droq_laserbox_placement1/server.rs"
+required-features = ["server"]
+
+[[bin]]
+name = "godot_sceneloader_server"
+path = "src/godot_sceneloader/server.rs"
+required-features = ["server"]
+
+
+
+
+# Required - not a group
 
 [features]
 client = ["ambient_api/client"]
