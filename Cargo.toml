@@ -8,9 +8,11 @@ version = "0.0.1"
 [dependencies]
 # ambient_api = { path = "../Ambient/guest/rust/api" }
 ambient_api = { git = "https://github.com/AmbientRun/Ambient.git", rev = "10c57e36c7da588195ec526acb9ef96ee27e0dcb" }
-rhai = { version = "1.15", features = ["sync"] }
 regex = "1"
 glam = "0.24.1"
+ambient_api = { git = "https://github.com/AmbientRun/Ambient.git", rev = "8ce8718f74be4501880788230480c7d863a9b04e" }
+
+rhai = { version = "1.15", features = ["sync"] }
 
 # Group 1: show the UI
 # This include the aiming cross in the middle of the screen
@@ -116,14 +118,14 @@ path = "src/droq_laserbox/client.rs"
 required-features = ["client"]
 
 [[bin]]
-name = "droq_laserbox_placement1_server"
-path = "src/droq_laserbox_placement1/server.rs"
-required-features = ["server"]
-
-[[bin]]
 name = "godot_sceneloader_server"
 path = "src/godot_sceneloader/server.rs"
 required-features = ["server"]
+
+
+
+
+# Required - not a group
 
 # ----------------------------------------------------------------
 # The console is a temporary debugging utility that lives in-game.

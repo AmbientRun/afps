@@ -13,4 +13,5 @@ includes = [
     "src/fpsaudio/ambient.toml",
     "src/droq_laserbox/ambient.toml",
     "src/console/ambient.toml",
+    "src/droq_laserbox/ambient.toml",
 ]
