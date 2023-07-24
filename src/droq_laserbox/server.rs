@@ -1,7 +1,6 @@
 use ambient_api::{
     components::core::{
-        app::main_scene,
-        camera::aspect_ratio_from_window,
+        app::name,
         physics::cube_collider,
         primitives::{cube,quad},
         rendering::color,
@@ -30,6 +29,7 @@ use components::{
 pub fn main() {
     messages::SpawnLaserbox::subscribe(|_src,msg|{
         let laserbox = Entity::new()
+            .with(name(), "Laserbox".to_string())
             .with_merge(make_transformable())
             .with_merge(make_laser_box())
             .with(cube(), ())
@@ -39,22 +39,19 @@ pub fn main() {
             .with(laserbox_laser_rot(), msg.facing_rot)
             .with(laserbox_dir(), msg.facing_dir)
             .spawn();
-        entity::set_component(laserbox, laserbox_enabled(), true);
+        entity::add_component(laserbox, laserbox_enabled(), true);
         add_laser_ent_to(laserbox);
-        
     });
 
     messages::Shoot::subscribe(move |_source, msg| {
-        println!("Shot!");
         let result = physics::raycast_first(msg.ray_origin, msg.ray_dir);
 
         if let Some(hit) = result {
-            println!("Hit somethin'!");
             if let Some(was_enabled) = entity::get_component(hit.entity, laserbox_enabled()) {
                 let laserbox = hit.entity;
                 let now_enabled = !was_enabled;
                 entity::set_component(laserbox, laserbox_enabled(), now_enabled);
-                println!("Toggle laser on or off: {}!", now_enabled);
+                println!("Shot a laserbox. Setting laserbox_enabled to '{}'", now_enabled);
                 if now_enabled {
                     add_laser_ent_to(laserbox);
                 } else {
@@ -66,7 +63,6 @@ pub fn main() {
 
     change_query((laserbox_enabled(), laserbox_laser_ent())).track_change(laserbox_enabled()).bind(|laserboxes|{
         for (laserbox, (enabled, _ent)) in laserboxes {
-            println!("Toggle laser on or off: {enabled}!");
             if enabled {
                 add_laser_ent_to(laserbox);
             } else {
@@ -89,7 +85,7 @@ pub fn main() {
 
 fn add_laser_ent_to(laserbox : EntityId) -> EntityId {
     try_remove_laser_ent_from(laserbox); // remove old
-    
+
     let pos = entity::get_component(laserbox, translation()).unwrap();
     let dir = entity::get_component(laserbox, laserbox_dir()).unwrap();
     let rot = entity::get_component(laserbox, laserbox_laser_rot()).unwrap();
@@ -107,12 +103,16 @@ fn add_laser_ent_to(laserbox : EntityId) -> EntityId {
         .with(laserbeam_range(), range)
         .spawn();
     entity::add_component(laserbox, laserbox_laser_ent(), laser_ent);
+
+    println!("Added laser to a laserbox");
     laser_ent
 }
 fn try_remove_laser_ent_from(laserbox : EntityId) -> bool {
     if let Some(laser_ent) = entity::get_component(laserbox, laserbox_laser_ent()) {
         entity::despawn(laser_ent);
         entity::remove_component(laserbox, laserbox_laser_ent());
+
+        println!("Removed laser from a laserbox");
         true
     } else { false }
 }
