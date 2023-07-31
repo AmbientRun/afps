@@ -1,8 +1,30 @@
 // TODO: this should vary based on the game type
 
-use ambient_api::components::core::{player::player, transform::translation};
+use ambient_api::components::core::{
+    player::player,
+    // primitives::cube,
+    // rendering::color,
+    transform::translation, // rotation, scale,
+};
+// use ambient_api::concepts::make_transformable;
 use ambient_api::prelude::*;
 use components::{heal_timeout, player_health};
+
+use ambient_api::{
+    components::core::{
+        app::main_scene,
+        camera::aspect_ratio_from_window,
+        physics::{
+            angular_velocity, cube_collider, dynamic, linear_velocity, physics_controlled,
+            plane_collider, sphere_collider,
+        },
+        primitives::{cube, quad, sphere_radius},
+        rendering::{cast_shadows, color, fog_density, light_diffuse, sky, sun, water},
+        transform::{lookat_target, rotation, scale},
+    },
+    concepts::{make_perspective_infinite_reverse_camera, make_sphere, make_transformable},
+    prelude::*,
+};
 
 #[main]
 pub fn main() {
@@ -23,9 +45,73 @@ pub fn main() {
         let result = physics::raycast_first(msg.ray_origin, msg.ray_dir);
 
         if let Some(hit) = result {
-            if hit.entity == msg.source {
-                eprintln!("self hit");
-                return;
+            // Laser gun, not used
+            // run_async(async move {
+            //     let laser_length = (hit.position - msg.ray_origin).length();
+            //     let ray_direction = (hit.position - msg.ray_origin).normalize();
+            //     let up = vec3(0.0, 0.0, 1.0);
+
+            //     let right = up.cross(ray_direction).normalize();
+            //     let up_direction = ray_direction.cross(right).normalize();
+
+            //     let rot_matrix = Mat3::from_cols(right, up_direction, ray_direction);
+            //     let rotation_quat = Quat::from_mat3(&rot_matrix);
+            //     println!("laser length: {}", laser_length);
+            //     let laser_center = (hit.position + msg.ray_origin) / 2.0;
+            //     let laser = Entity::new()
+            //         .with_merge(make_transformable())
+            //         .with_default(cube())
+            //         .with(scale(), vec3(0.01, 0.01, laser_length * 0.6))
+            //         .with(translation(), laser_center)
+            //         .with(rotation(), rotation_quat)
+            //         .with(color(), vec4(0.5, 0.4, 0.7, 0.8))
+            //         .spawn();
+            //     sleep(0.1).await;
+            //     entity::despawn(laser);
+            // });
+
+            // TODO: just to test death anim
+            // if hit.entity == msg.source {
+            //     eprintln!("self hit");
+            //     return;
+            // }
+
+            if entity::has_component(hit.entity, components::player_team()) {
+                let pos = entity::get_component(hit.entity, translation()).unwrap();
+                messages::Explosion { pos }.send_local_broadcast(false);
+                let c = entity::get_component(hit.entity, color()).unwrap();
+                entity::despawn(hit.entity);
+                run_async(async move {
+                    for _ in 0..40 {
+                        let pos =
+                            pos + vec3(random::<f32>(), random::<f32>(), random::<f32>()) * 9.0;
+
+                        let size = random::<Vec3>() * 0.3;
+                        let rot = Quat::from_rotation_y(random::<f32>() * 3.14)
+                            * Quat::from_rotation_x(random::<f32>() * 3.14);
+                        Entity::new()
+                            .with_merge(make_transformable())
+                            .with_default(cube())
+                            .with(rotation(), rot)
+                            .with_default(physics_controlled())
+                            .with_default(cast_shadows())
+                            .with(
+                                linear_velocity(),
+                                vec3(
+                                    random::<f32>() * 3.0,
+                                    random::<f32>() * 5.0,
+                                    random::<f32>() * 10.0,
+                                ),
+                            )
+                            // .with(angular_velocity(), random::<Vec3>() * 1.0)
+                            .with(cube_collider(), Vec3::ONE)
+                            .with(dynamic(), true)
+                            .with(scale(), random::<Vec3>() * size * 2.0)
+                            .with(translation(), pos)
+                            .with(color(), c)
+                            .spawn();
+                    }
+                });
             }
 
             if let Some(old_health) = entity::get_component(hit.entity, components::player_health())
@@ -34,11 +120,26 @@ pub fn main() {
                     return;
                 }
 
+                let hit_back_dir = (msg.ray_origin - hit.position).normalize();
+                let displace = hit_back_dir * -0.1;
+                physics::move_character(hit.entity, displace, 0.001, delta_time());
+
+                // rotation
+                let forward = (hit.position - msg.ray_origin + random::<Vec3>() * 0.01).normalize();
+
+                let forward_flat = vec3(forward.x, forward.y, 0.0).normalize();
+                let rot = Quat::from_rotation_arc(vec3(0.0, 1.0, 0.0), forward_flat);
+
+                entity::set_component(hit.entity, rotation(), rot);
+
+                entity::set_component(hit.entity, components::player_vspeed(), 0.04);
+
                 let new_health = (old_health - 10).max(0);
                 entity::set_component(hit.entity, components::player_health(), new_health);
 
                 if old_health > 0 && new_health <= 0 {
                     println!("player dead, waiting for respawn");
+                    // 114 is the death anim frame count
                     entity::set_component(hit.entity, components::hit_freeze(), 114);
                     entity::mutate_component(msg.source, components::player_killcount(), |count| {
                         *count += 1;
@@ -50,8 +151,9 @@ pub fn main() {
                             *count += 1;
                         },
                     );
+                    // TODO: wait for anim msg to respawn
                     run_async(async move {
-                        sleep(114. / 60.).await;
+                        sleep(3.).await;
 
                         if !entity::exists(hit.entity) {
                             return;
