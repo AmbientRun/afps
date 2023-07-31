@@ -32,6 +32,13 @@ pub fn main() {
                     return;
                 }
                 let hand = hand.unwrap();
+
+                let head = get_bone_by_bind_id(model, &BindId::Head);
+                if head.is_none() {
+                    return;
+                }
+                let head = head.unwrap();
+
                 let gun = Entity::new()
                     .with_merge(make_transformable())
                     .with(
@@ -45,7 +52,6 @@ pub fn main() {
                         Quat::from_rotation_y(-std::f32::consts::FRAC_PI_2),
                     )
                     .with(scale(), Vec3::ONE * 0.01)
-                    .with(color(), vec4(1.0, 1.0, 0.0, 1.0))
                     .with_default(local_to_parent())
                     .with_default(reset_scale())
                     .spawn();
@@ -54,30 +60,22 @@ pub fn main() {
                     .with(aspect_ratio_from_window(), EntityId::resources())
                     .with_default(main_scene())
                     .with(user_id(), uid)
-                    .with(parent(), id)
+                    // .with(parent(), id)
                     // this is FPS
                     // .with(translation(), vec3(0.0, 0.2, 2.0))
                     // third person
-                    // .with(translation(), vec3(0.0, 4.0, 3.0))
-                    .with_default(local_to_parent())
+                    // .with(translation(), vec3(-100.0, 0.0, 0.0))
+                    // .with_default(local_to_parent())
                     // .with_default(local_to_world())
-                    .with(
-                        rotation(),
-                        Quat::from_rotation_x(std::f32::consts::FRAC_PI_2),
-                    )
+                    .with(rotation(), Quat::from_rotation_x(std::f32::consts::PI))
+                    .with_default(local_to_parent())
                     .spawn();
 
-                entity::mutate_component(id, children(), |v| {
-                    v.push(cam);
-                });
+                // entity::mutate_component(id, children(), |v| {
+                //     v.push(cam);
+                // });
 
                 entity::add_component(id, components::player_cam_ref(), cam);
-
-                let head = get_bone_by_bind_id(model, &BindId::Head);
-                if head.is_none() {
-                    return;
-                }
-                let head = head.unwrap();
 
                 entity::add_child(hand, gun);
                 entity::add_child(head, cam);
