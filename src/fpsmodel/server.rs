@@ -66,7 +66,11 @@ pub async fn main() {
                         .with_default(local_to_world())
                         .with(
                             translation(),
-                            vec3(random::<f32>() * 20., random::<f32>() * 20., 2.0),
+                            vec3(
+                                random::<f32>() * 60. - 30.,
+                                random::<f32>() * 60. - 30.,
+                                3.0,
+                            ),
                         )
                         .with(children(), vec![model])
                         // .with(components::player_cam_ref(), cam)

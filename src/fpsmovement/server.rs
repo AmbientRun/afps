@@ -87,13 +87,13 @@ pub fn main() {
         })
         .unwrap_or_default();
 
-        if let Some(cam_id) = entity::get_component(player_id, components::player_cam_ref()) {
-            entity::set_component(
-                cam_id,
-                rotation(),
-                Quat::from_rotation_x(std::f32::consts::FRAC_PI_2 + pitch),
-            );
-        }
+        // if let Some(cam_id) = entity::get_component(player_id, components::player_cam_ref()) {
+        //     entity::set_component(
+        //         cam_id,
+        //         rotation(),
+        //         Quat::from_rotation_x(std::f32::consts::FRAC_PI_2 + pitch),
+        //     );
+        // }
 
         if msg.shoot {
             messages::Shoot {

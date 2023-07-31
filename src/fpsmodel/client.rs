@@ -59,22 +59,14 @@ pub fn main() {
                     .with_merge(make_perspective_infinite_reverse_camera())
                     .with(aspect_ratio_from_window(), EntityId::resources())
                     .with_default(main_scene())
-                    .with(user_id(), uid)
-                    // .with(parent(), id)
-                    // this is FPS
-                    // .with(translation(), vec3(0.0, 0.2, 2.0))
-                    // third person
-                    // .with(translation(), vec3(-100.0, 0.0, 0.0))
-                    // .with_default(local_to_parent())
-                    // .with_default(local_to_world())
-                    .with(rotation(), Quat::from_rotation_x(std::f32::consts::PI))
+                    .with(translation(), vec3(-0.1, 0.2, 0.))
                     .with_default(local_to_parent())
+                    .with(
+                        rotation(),
+                        Quat::from_rotation_z(std::f32::consts::FRAC_PI_6 / 1.2), // x is pitch
+                    )
+                    .with_default(reset_scale())
                     .spawn();
-
-                // entity::mutate_component(id, children(), |v| {
-                //     v.push(cam);
-                // });
-
                 entity::add_component(id, components::player_cam_ref(), cam);
 
                 entity::add_child(hand, gun);
