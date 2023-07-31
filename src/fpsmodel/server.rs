@@ -26,23 +26,23 @@ pub async fn main() {
                 entity::wait_for_component(id, components::player_name()).await;
 
                 // refer to the first person example in Ambient repo
-                let cam = Entity::new()
-                    .with_merge(make_perspective_infinite_reverse_camera())
-                    .with(aspect_ratio_from_window(), EntityId::resources())
-                    .with_default(main_scene())
-                    .with(parent(), id)
-                    .with(user_id(), uid)
-                    // this is FPS
-                    // .with(translation(), vec3(0.0, 0.2, 2.0))
-                    // third person
-                    .with(translation(), vec3(0.0, 4.0, 3.0))
-                    .with_default(local_to_parent())
-                    // .with_default(local_to_world())
-                    .with(
-                        rotation(),
-                        Quat::from_rotation_x(std::f32::consts::FRAC_PI_2),
-                    )
-                    .spawn();
+                // let cam = Entity::new()
+                //     .with_merge(make_perspective_infinite_reverse_camera())
+                //     .with(aspect_ratio_from_window(), EntityId::resources())
+                //     .with_default(main_scene())
+                //     .with(parent(), id)
+                //     .with(user_id(), uid)
+                //     // this is FPS
+                //     // .with(translation(), vec3(0.0, 0.2, 2.0))
+                //     // third person
+                //     .with(translation(), vec3(0.0, 4.0, 3.0))
+                //     .with_default(local_to_parent())
+                //     // .with_default(local_to_world())
+                //     .with(
+                //         rotation(),
+                //         Quat::from_rotation_x(std::f32::consts::FRAC_PI_2),
+                //     )
+                //     .spawn();
                 let model = Entity::new()
                     .with_merge(make_transformable())
                     .with(
@@ -68,8 +68,8 @@ pub async fn main() {
                             translation(),
                             vec3(random::<f32>() * 20., random::<f32>() * 20., 2.0),
                         )
-                        .with(children(), vec![model, cam])
-                        .with(components::player_cam_ref(), cam)
+                        .with(children(), vec![model])
+                        // .with(components::player_cam_ref(), cam)
                         .with(components::player_model_ref(), model),
                 );
             });

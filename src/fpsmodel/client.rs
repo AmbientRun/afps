@@ -1,7 +1,15 @@
 use ambient_api::{
     animation::{get_bone_by_bind_id, BindId},
-    components::core::{model::model_loaded, prefab::prefab_from_url, transform::reset_scale},
-    concepts::make_transformable,
+    components::core::{
+        app::main_scene,
+        camera::aspect_ratio_from_window,
+        ecs::{children, parent},
+        model::model_loaded,
+        player::user_id,
+        prefab::prefab_from_url,
+        transform::reset_scale,
+    },
+    concepts::{make_perspective_infinite_reverse_camera, make_transformable},
     prelude::*,
 };
 
@@ -14,8 +22,8 @@ use ambient_api::components::core::{
 
 #[main]
 pub fn main() {
-    spawn_query((player(), components::player_model_ref())).bind(move |results| {
-        for (_, (_, model)) in results {
+    spawn_query((player(), components::player_model_ref(), user_id())).bind(move |results| {
+        for (id, (_, model, uid)) in results {
             run_async(async move {
                 entity::wait_for_component(model, model_loaded()).await;
                 println!("___model loaded___waiting for binding__");
@@ -41,18 +49,38 @@ pub fn main() {
                     .with_default(local_to_parent())
                     .with_default(reset_scale())
                     .spawn();
-                // let f = Entity::new()
-                //     .with_merge(make_transformable())
-                //     .with_default(quad())
-                //     .with(scale(), Vec3::ONE * 100.)
-                //     .with(
-                //         pbr_material_from_url(),
-                //         asset::url("assets/pipeline.toml/5/mat.json").unwrap(),
-                //     )
-                //     .with_default(local_to_parent())
-                //     .spawn();
+                let cam = Entity::new()
+                    .with_merge(make_perspective_infinite_reverse_camera())
+                    .with(aspect_ratio_from_window(), EntityId::resources())
+                    .with_default(main_scene())
+                    .with(user_id(), uid)
+                    .with(parent(), id)
+                    // this is FPS
+                    // .with(translation(), vec3(0.0, 0.2, 2.0))
+                    // third person
+                    // .with(translation(), vec3(0.0, 4.0, 3.0))
+                    .with_default(local_to_parent())
+                    // .with_default(local_to_world())
+                    .with(
+                        rotation(),
+                        Quat::from_rotation_x(std::f32::consts::FRAC_PI_2),
+                    )
+                    .spawn();
+
+                entity::mutate_component(id, children(), |v| {
+                    v.push(cam);
+                });
+
+                entity::add_component(id, components::player_cam_ref(), cam);
+
+                let head = get_bone_by_bind_id(model, &BindId::Head);
+                if head.is_none() {
+                    return;
+                }
+                let head = head.unwrap();
+
                 entity::add_child(hand, gun);
-                // entity::add_child(hand, f);
+                entity::add_child(head, cam);
             });
         }
     });
