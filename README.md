@@ -1,3 +1,9 @@
+# Deprecated
+
+This game has been moved to [the Ambient repository](https://github.com/AmbientRun/Ambient/tree/main/guest/rust/packages/games/afps).
+
+---
+
 # AFPS Mods
 
 AFPS is a moddable FPS game written with the Ambient engine.
